@@ -16,7 +16,8 @@ service_account_name: drone-shazam
 
 volumes:
   - name: docker-sock
-    host: /var/run/docker.sock
+    host:
+      path: /var/run/docker.sock
 
 steps:
   - name: build
