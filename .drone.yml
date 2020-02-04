@@ -21,6 +21,6 @@ service_account_name: drone-shazam
 
 steps:
   - name: build
-    image: clux/rustmusl
+    image: clux/muslrust
     commands:
       - sleep 3000
