@@ -14,20 +14,13 @@ metadata:
     iam.amazonaws.com/role: k8s-drone
 service_account_name: drone-shazam
 
-volumes:
-  - name: host-var-run
-    host:
-      path: /var/run
+#volumes:
+#  - name: host-var-run
+#    host:
+#      path: /var/run
 
 steps:
   - name: build
-    image: docker:stable
-    environment:
-      DEBIAN_FRONTEND: noninteractive
-      DOCKER_HOST: unix:///host/var/run/docker.sock
-      AWS_REGION: us-west-2
-    volumes:
-      - name: host-var-run
-        path: /host/var/run/
+    image: clux/rustmusl
     commands:
       - sleep infinity
