@@ -15,18 +15,19 @@ metadata:
 service_account_name: drone-shazam
 
 volumes:
-  - name: docker-sock
+  - name: host-var-run
     host:
-      path: /var/run/docker.sock
+      path: /var/run
 
 steps:
   - name: build
     image: docker:stable
     environment:
       DEBIAN_FRONTEND: noninteractive
+      DOCKER_HOST: unix:///host/var/run/docker.sock
       AWS_REGION: us-west-2
     volume:
-      - name: docker-sock
-        path: /var/run/docker.sock
+      - name: host-var-run
+        path: /host/var/run/
     commands:
       - sleep infinity
