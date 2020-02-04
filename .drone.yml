@@ -26,7 +26,7 @@ steps:
       DEBIAN_FRONTEND: noninteractive
       DOCKER_HOST: unix:///host/var/run/docker.sock
       AWS_REGION: us-west-2
-    volume:
+    volumes:
       - name: host-var-run
         path: /host/var/run/
     commands:
