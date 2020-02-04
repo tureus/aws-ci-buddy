@@ -1,0 +1,12 @@
+[package]
+name = "ecr-docker-login"
+version = "0.1.0"
+authors = ["Xavier Lange <xrlange@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+base64 = "0.11.0"
+rusoto_core = "0.42.0"
+rusoto_ecr = "0.42.0"
