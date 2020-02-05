@@ -23,7 +23,7 @@ steps:
   - name: build
     image: 539703851677.dkr.ecr.us-west-2.amazonaws.com/rust-musl:2020-02-04
     environment:
-      SHORT_SHA: "$${COMMIT:0:7}"
+      SHORT_SHA: $${COMMIT:0:7}
     commands:
       - echo $SHORT_SHA
       - sudo apt-get update && sudo apt-get install -y python3-pip && sudo pip3 install awscli
