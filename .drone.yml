@@ -26,4 +26,4 @@ steps:
       - echo ${CI_COMMIT_SHA:0:8}
       - sudo apt-get update && sudo apt-get install -y python3-pip && sudo pip3 install awscli
       - cargo build --release
-      - aws s3 cp --no-progress target/x86_64-unknown-linux-musl/release/ecr-docker-login s3://ids-dev-artifacts/ecr-docker-login/${CI_COMMIT_SHA:0:8}/ecr-docker-login
+      - aws s3 cp --no-progress --acl=public-read target/x86_64-unknown-linux-musl/release/ecr-docker-login s3://ids-dev-artifacts/ecr-docker-login/${CI_COMMIT_SHA:0:8}/ecr-docker-login
