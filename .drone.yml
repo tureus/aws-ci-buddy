@@ -23,6 +23,6 @@ steps:
   - name: build
     image: 539703851677.dkr.ecr.us-west-2.amazonaws.com/rust-musl:2020-02-04
     commands:
-      - apt-get update && apt-get install -y python3-pip && pip3 install awscli
+      - sudo apt-get update && sudo apt-get install -y python3-pip && sudo pip3 install awscli
       - cargo build --release
       - aws s3 cp target/x86_64-unknown-linux-musl/release/ecr-docker-login
