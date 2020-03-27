@@ -1,5 +1,5 @@
 [package]
-name = "ecr-docker-login"
+name = "aws-ci-buddy"
 version = "0.1.0"
 authors = ["Xavier Lange <xrlange@gmail.com>"]
 edition = "2018"
@@ -8,5 +8,10 @@ edition = "2018"
 
 [dependencies]
 base64 = "0.11.0"
-rusoto_core = "0.42.0"
-rusoto_ecr = "0.42.0"
+rusoto_core = "0.43.0"
+rusoto_ecr = "0.43.0"
+rusoto_s3 = "0.43.0"
+tokio = {version="0.2", features=["full"]}
+clap = "2"
+url = "2"
+tokio-util = { version ="0.3", features=["full"]}

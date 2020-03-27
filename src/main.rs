@@ -1,70 +1,59 @@
-use base64::DecodeError;
-use rusoto_core::{Region, RusotoError};
-use rusoto_ecr::{Ecr, EcrClient, GetAuthorizationTokenRequest};
-use std::error::Error;
+use aws_ci_buddy::EcrDockerLoginError;
+use clap::{App, Arg, SubCommand};
 
-fn main() -> Result<(), EcrDockerLoginError> {
-    let client = EcrClient::new(Region::default());
+#[tokio::main]
+async fn main() -> Result<(), EcrDockerLoginError> {
+    let mut app = App::new("aws-ci-buddy")
+        .version("0.1")
+        .author("Xavier Lange <xrlange@gmail.com>")
+        .about("Make it easy to common CI-related tasks without a big dependency")
+        .subcommand(
+            SubCommand::with_name("ecr")
+                .arg(Arg::with_name("get-login").help("Get an ecr-login string")),
+        )
+        .subcommand(
+            SubCommand::with_name("s3")
+                .subcommand(
+                    SubCommand::with_name("cp")
+                        .arg(Arg::with_name("source").takes_value(true))
+                        .arg(Arg::with_name("target").takes_value(true)),
+                )
+                .subcommand(
+                    SubCommand::with_name("ls").arg(Arg::with_name("path").takes_value(true)),
+                ),
+        );
+    let matches = app.clone().get_matches();
 
-    let auth_token_resp = client
-        .get_authorization_token(GetAuthorizationTokenRequest {
-            ..Default::default()
-        })
-        .sync()?;
+    if let Some(ecr_cmd) = matches.subcommand_matches("ecr") {
+        if ecr_cmd.value_of("get-login").is_some() {
+            aws_ci_buddy::ecr_login().await?;
+        } else {
+            app.print_help().unwrap();
+        }
+    } else if let Some(s3_cmd) = matches.subcommand_matches("s3") {
+        if let Some(cp_cmd) = s3_cmd.subcommand_matches("cp") {
+            match (cp_cmd.value_of("source"), cp_cmd.value_of("target")) {
+                (Some(src), Some(tgt)) => {
+                    aws_ci_buddy::s3_cp(src, tgt).await?;
+                }
+                _ => {
+                    app.print_help().unwrap();
+                }
+            }
+        } else if let Some(ls_cmd) = s3_cmd.subcommand_matches("ls") {
+            aws_ci_buddy::s3_ls(ls_cmd.value_of("path")).await?;
+        } else {
+            app.print_help().unwrap();
+        }
+    } else {
+        app.print_help().unwrap();
+    }
 
-    let auth_data = auth_token_resp
-        .authorization_data
-        .unwrap_or_else(|| panic!("no auth data in the valid token response. weird!"));
-    assert_eq!(auth_data.len(), 1);
-    let auth_data = &auth_data[0];
+    // if matches.
 
-    let auth_token = auth_data.authorization_token.as_ref().unwrap();
-    let decoded_auth_token_vec = base64::decode(auth_token)?;
-    let decoded_auth_token = String::from_utf8(decoded_auth_token_vec)?;
-    let mut auth_token_parts = decoded_auth_token.split(":");
-    let username = auth_token_parts.next().expect("username part");
-    let password = auth_token_parts.next().expect("password part");
-    let proxy_endpoint = auth_data.proxy_endpoint.as_ref().expect("proxy endpoint");
+    // panic!("matches: {:#?}", matches);
 
-    println!(
-        "docker login -u {} -p {} {}",
-        username, password, proxy_endpoint
-    );
+    // ecr_login().await?;
 
     Ok(())
-}
-
-#[derive(Debug)]
-enum EcrDockerLoginError {
-    RusotoError,
-    Base64DecodeError,
-    Utf8Error,
-    IOError,
-}
-
-impl<E> From<RusotoError<E>> for EcrDockerLoginError
-where
-    E: Error,
-{
-    fn from(_: RusotoError<E>) -> Self {
-        EcrDockerLoginError::RusotoError
-    }
-}
-
-impl From<DecodeError> for EcrDockerLoginError {
-    fn from(_: DecodeError) -> Self {
-        EcrDockerLoginError::Base64DecodeError
-    }
-}
-
-impl From<std::string::FromUtf8Error> for EcrDockerLoginError {
-    fn from(_: std::string::FromUtf8Error) -> Self {
-        EcrDockerLoginError::Utf8Error
-    }
-}
-
-impl From<std::io::Error> for EcrDockerLoginError {
-    fn from(_: std::io::Error) -> Self {
-        EcrDockerLoginError::IOError
-    }
 }
